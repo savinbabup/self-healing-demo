@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add `set -x` to the `before_script` section to enable shell script debugging output.
