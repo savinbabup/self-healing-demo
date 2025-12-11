@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Modify the build step to add a verbose/debug flag (e.g., `npm run build --verbose`) or set a CI environment variable to enable debug-level logging.
