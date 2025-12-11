@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Validate the .gitlab-ci.yml file for syntax errors and ensure all referenced stages, jobs, and services are correctly defined.
