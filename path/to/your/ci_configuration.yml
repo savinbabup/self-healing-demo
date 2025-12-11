@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# In the 'build' job's script section, add a verbose flag to the build command (e.g., change 'mvn clean install' to 'mvn clean install -X').
