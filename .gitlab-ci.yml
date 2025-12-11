@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add a basic 'hello world' script to the beginning of the build stage to verify the runner is functional and the CI/CD configuration is being parsed correctly.
