@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# If using GitLab CI, set the CI/CD variable 'CI_DEBUG_TRACE' to 'true' in the project settings.
