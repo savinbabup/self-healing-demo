@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add basic logging to the beginning of the build script to identify if the script is even being executed.
