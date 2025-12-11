@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add a `before_script` section to install essential build dependencies if they are missing.
