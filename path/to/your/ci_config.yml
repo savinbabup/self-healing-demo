@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# In the 'build' job step, add a verbose flag to the primary build command (e.g., change `npm run build` to `npm run build -- --verbose` or `make` to `make -d`).
