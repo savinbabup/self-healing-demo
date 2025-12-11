@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add `set -x` to the build script to enable verbose shell tracing.
