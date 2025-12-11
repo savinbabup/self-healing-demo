@@ -54,15 +54,15 @@ jobs:
         if: steps.check_failure.outputs.failed == 'true' && vars.KESTRA_URL != ''
         run: |
           echo "🚀 Triggering Self-Healing CI..."
+          LOGS='${{ steps.prepare_logs.outputs.logs }}'
           curl -X POST ${{ vars.KESTRA_URL }}/api/v1/executions/webhook/company.ci/self-healing-ci-with-pr/ci-failure-webhook \
             -H "Content-Type: application/json" \
             -d "{
               \"repository\": \"${{ github.repository }}\",
               \"job_name\": \"${{ github.job }}\",
               \"error_message\": \"Test execution failed in ${{ github.workflow }}\",
-              \"error_logs\": ${{ steps.prepare_logs.outputs.logs }},
+              \"error_logs\": $LOGS,
               \"github_token\": \"${{ secrets.SELF_HEALING_GITHUB_TOKEN }}\",
-              \"gemini_api_key\": \"${{ secrets.GEMINI_API_KEY }}\",
               \"create_pr\": true
             }" || echo "⚠️ Failed to trigger Self-Healing CI (Kestra may be unreachable)"
 
