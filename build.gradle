@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# If a Gradle build is used, add '-d' option to the gradle command to enable debug logs
