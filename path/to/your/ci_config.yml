@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# In the 'build' job, add a verbose or debug flag to the primary build command (e.g., change 'make build' to 'make build V=1').
