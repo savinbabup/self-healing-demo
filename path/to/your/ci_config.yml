@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# In the 'build' job steps, modify the primary build command to add a verbose/debug flag (e.g., change 'npm run build' to 'npm run build -- --verbose').
