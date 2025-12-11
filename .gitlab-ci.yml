@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add 'set -x' to the beginning of the script section to enable shell tracing for debugging.
