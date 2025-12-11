@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add the appropriate flag for verbose output to the build command (e.g., `mvn -X build` or `gradle build --debug`).
