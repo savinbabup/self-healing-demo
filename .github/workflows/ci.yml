@@ -16,13 +16,15 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install pytest
+        run: |
+          pip install pytest
+          sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run tests
         id: run_tests
         run: |
           set -o pipefail
-          python calc.py 2>&1 | tee test_output.log
+          pytest -v --tb=short 2>&1 | tee test_output.log
         continue-on-error: true
 
       - name: Check if tests failed
@@ -43,7 +45,7 @@ jobs:
         run: |
           echo "Preparing error logs..."
           if [ -f test_output.log ]; then
-            # Escape and format logs for JSON
+            # Escape and format logs for JSON using jq
             LOGS=$(cat test_output.log | jq -Rs .)
             echo "logs=$LOGS" >> $GITHUB_OUTPUT
           else
