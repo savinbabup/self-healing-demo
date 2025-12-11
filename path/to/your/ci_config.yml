@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add a debug/verbose flag to the build step or set a CI environment variable to enable verbose logging (e.g., set env var ACTIONS_STEP_DEBUG=true).
