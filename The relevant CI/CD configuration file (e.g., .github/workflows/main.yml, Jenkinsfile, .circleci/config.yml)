@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add a verbose/debug flag to the command in the 'build' step. For example, change 'npm install' to 'npm install --verbose'.
