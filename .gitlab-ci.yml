@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add 'set -x' to the beginning of the 'before_script' section to enable verbose shell output and debug the initial build steps.
