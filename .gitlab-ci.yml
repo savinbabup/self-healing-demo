@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# Add 'set -x' to the beginning of the build script to enable shell tracing for debugging.
