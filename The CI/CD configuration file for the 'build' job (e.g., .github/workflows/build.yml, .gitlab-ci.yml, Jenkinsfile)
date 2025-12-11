@@ -1,0 +1,4 @@
+
+
+# AI-Suggested Fix:
+# In the step that runs the build script, add 'set -ex' to the beginning of the command or script block to enable verbose logging and exit-on-error behavior.
