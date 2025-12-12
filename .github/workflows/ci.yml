@@ -2,11 +2,18 @@ name: CI
 
 on:
   push:
+    branches-ignore:
+      - 'fix/ci-failure-*'  # Ignore auto-fix branches to prevent infinite loops
   pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    # Prevent infinite CI loops on auto-generated fix branches
+    if: ${{ !startsWith(github.ref, 'refs/heads/fix/ci-failure-') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -15,10 +22,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           pip install pytest
-          sudo apt-get update && sudo apt-get install -y jq
+          sudo apt-get update -y && sudo apt-get install -y jq
 
       - name: Run tests
         id: run_tests
@@ -33,7 +40,7 @@ jobs:
         run: |
           if [ "${{ steps.run_tests.outcome }}" == "failure" ]; then
             echo "failed=true" >> $GITHUB_OUTPUT
-            echo "✅ Test failed - will trigger self-healing"
+            echo "❌ Tests failed - triggering self-healing"
           else
             echo "failed=false" >> $GITHUB_OUTPUT
             echo "✅ Tests passed"
@@ -53,30 +60,36 @@ jobs:
           fi
 
       - name: Trigger Self-Healing CI
-        if: steps.check_failure.outputs.failed == 'true' && vars.KESTRA_URL != ''
+        if: |
+          steps.check_failure.outputs.failed == 'true' &&
+          vars.KESTRA_URL != '' &&
+          !startsWith(github.ref, 'refs/heads/fix/ci-failure-')
         run: |
           echo "🚀 Triggering Self-Healing CI..."
           LOGS='${{ steps.prepare_logs.outputs.logs }}'
-          curl -X POST ${{ vars.KESTRA_URL }}/api/v1/executions/webhook/company.ci/self-healing-ci-with-pr/ci-failure-webhook \
+
+          curl -X POST \
+            "${{ vars.KESTRA_URL }}/api/v1/executions/webhook/company.self-healing/failure-intake-rca/ci-failure-webhook" \
             -H "Content-Type: application/json" \
             -d "{
               \"repository\": \"${{ github.repository }}\",
+              \"branch\": \"${{ github.ref_name }}\",
+              \"commit_sha\": \"${{ github.sha }}\",
               \"job_name\": \"${{ github.job }}\",
               \"error_message\": \"Test execution failed in ${{ github.workflow }}\",
               \"error_logs\": $LOGS,
-              \"github_token\": \"${{ secrets.SELF_HEALING_GITHUB_TOKEN }}\",
-              \"create_pr\": true
-            }" || echo "⚠️ Failed to trigger Self-Healing CI (Kestra may be unreachable)"
+              \"github_token\": \"${{ secrets.SELF_HEALING_GITHUB_TOKEN }}\"
+            }" || echo "⚠️ Failed to reach Kestra. Check KESTRA_URL."
 
       - name: Notify on Self-Healing status
         if: steps.check_failure.outputs.failed == 'true'
         run: |
           if [ -n "${{ vars.KESTRA_URL }}" ]; then
-            echo "🤖 Self-Healing CI has been triggered!"
-            echo "✅ An AI-powered PR will be created shortly with suggested fixes."
-            echo "📍 Check: https://github.com/${{ github.repository }}/pulls"
+            echo "🤖 Self-Healing CI triggered!"
+            echo "✅ AI-powered PR will be created shortly."
+            echo "📍 PRs: https://github.com/${{ github.repository }}/pulls"
           else
-            echo "⚠️ Self-Healing CI is not configured (KESTRA_URL variable not set)"
+            echo "⚠️ KESTRA_URL not set"
             echo "💡 Set it in: Settings → Secrets and variables → Actions → Variables"
           fi
 
