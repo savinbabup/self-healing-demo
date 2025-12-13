@@ -10,6 +10,10 @@ def multiply(a, b):
     # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
     return a + b
 
+def multiply(a, b):
+    # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
+    return a - b
+
 def divide(a, b):
     if b == 0:
         raise ValueError("Cannot divide by zero")
