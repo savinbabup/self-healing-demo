@@ -1,24 +1,19 @@
 def add(a, b):
-    # BUG 1: Logic Error (Subtraction instead of Addition)
-    return a - b
+    return a + b
 
 def subtract(a, b):
-    # BUG 2: Argument Swap (Returns b - a instead of a - b)
-    return b - a
+    return a - b
 
 def multiply(a, b):
-    # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
-    return a + b
+    return a * b
 
 def divide(a, b):
     if b == 0:
-        raise ValueError("Cannot divide by zero")
+        raise ZeroDivisionError("Cannot divide by zero")
     return a / b
 
 def average(a, b):
-    # BUG 4: Order of Operations (Missing parentheses!)
-    # Computes a + (b/2) instead of (a+b)/2
-    return a + b / 2
+    return (a + b) / 2
 
 if __name__ == "__main__":
     print("🧪 Running internal tests...")
