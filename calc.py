@@ -1,20 +1,20 @@
 def add(a, b):
     # BUG 1: The "Fat Finger" Error (Multiplication instead of Addition)
-    return a * b
+    return a + b
 
 def subtract(a, b):
     # BUG 2: The "Incomplete Thought" (Forgot to actually subtract b)
-    return a + b
+    return a - b
 
 def multiply(a, b):
     # BUG 3: The "Wrong Operator" (Power instead of Multiplication)
     # returns a to the power of b (e.g., 3^4 = 81 instead of 12)
-    return a / b
+    return a * b
 
 def divide(a, b):
     if b == 0:
-        raise ValueError("Cannot divide by zero")
-    return a * b
+        raise ZeroDivisionError("Cannot divide by zero")
+    return a / b
 
 def power(a, b):
     # BUG 4: The "Bitwise XOR" Trap
