@@ -1,14 +1,14 @@
 def add(a, b):
     # BUG 1: Logic Error (Subtraction instead of Addition)
-    return a - b
+    return a + b
 
 def subtract(a, b):
     # BUG 2: Argument Swap (Returns b - a instead of a - b)
-    return b - a
+    return a - b
 
 def multiply(a, b):
     # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
-    return a + b
+    return a * b
 
 def divide(a, b):
     if b == 0:
