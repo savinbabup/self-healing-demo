@@ -1,98 +1,69 @@
-name: CI
+name: CI & Self-Healing
 
-on:
-  push:
-    branches-ignore:
-      - 'fix/ci-failure-*'  # Ignore auto-fix branches to prevent infinite loops
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  test:
+  test-and-heal:
     runs-on: ubuntu-latest
-
-    # Prevent infinite CI loops on auto-generated fix branches
-    if: ${{ !startsWith(github.ref, 'refs/heads/fix/ci-failure-') }}
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          pip install pytest
-          sudo apt-get update -y && sudo apt-get install -y jq
+    - name: Install Dependencies
+      run: |
+        pip install pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run tests
-        id: run_tests
-        run: |
-          set -o pipefail
-          pytest -v --tb=short 2>&1 | tee test_output.log
-        continue-on-error: true
+    # 1️⃣ RUN TESTS AND CAPTURE LOGS
+    - name: Run Tests & Capture Output
+      id: run_tests
+      run: |
+        # Run pytest and save output to file (ignore failure for now with || true)
+        pytest > test_logs.txt 2>&1 || true
+        
+        # Display logs in console
+        cat test_logs.txt
+        
+        # Check for failure
+        if grep -q "FAILED" test_logs.txt; then
+          echo "❌ Tests failed! Preparing self-healing trigger..."
+          echo "status=failure" >> $GITHUB_OUTPUT
+        else
+          echo "✅ Tests passed!"
+          echo "status=success" >> $GITHUB_OUTPUT
+        fi
 
-      - name: Check if tests failed
-        id: check_failure
-        if: always()
-        run: |
-          if [ "${{ steps.run_tests.outcome }}" == "failure" ]; then
-            echo "failed=true" >> $GITHUB_OUTPUT
-            echo "❌ Tests failed - triggering self-healing"
-          else
-            echo "failed=false" >> $GITHUB_OUTPUT
-            echo "✅ Tests passed"
-          fi
-
-      - name: Prepare logs for Self-Healing CI
-        if: steps.check_failure.outputs.failed == 'true'
-        id: prepare_logs
-        run: |
-          echo "Preparing error logs..."
-          if [ -f test_output.log ]; then
-            # Escape and format logs for JSON using jq
-            LOGS=$(cat test_output.log | jq -Rs .)
-            echo "logs=$LOGS" >> $GITHUB_OUTPUT
-          else
-            echo 'logs="No logs available"' >> $GITHUB_OUTPUT
-          fi
-
-      - name: Trigger Self-Healing CI
-        if: |
-          steps.check_failure.outputs.failed == 'true' &&
-          vars.KESTRA_URL != '' &&
-          !startsWith(github.ref, 'refs/heads/fix/ci-failure-')
-        run: |
-          echo "🚀 Triggering Self-Healing CI..."
-          LOGS='${{ steps.prepare_logs.outputs.logs }}'
-
-          curl -X POST \
-            "${{ vars.KESTRA_URL }}/api/v1/executions/webhook/company.self-healing/failure-intake-rca/ci-failure-webhook" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"repository\": \"${{ github.repository }}\",
-              \"branch\": \"${{ github.ref_name }}\",
-              \"commit_sha\": \"${{ github.sha }}\",
-              \"job_name\": \"${{ github.job }}\",
-              \"error_message\": \"Test execution failed in ${{ github.workflow }}\",
-              \"error_logs\": $LOGS,
-              \"github_token\": \"${{ secrets.SELF_HEALING_GITHUB_TOKEN }}\"
-            }" || echo "⚠️ Failed to reach Kestra. Check KESTRA_URL."
-
-      - name: Notify on Self-Healing status
-        if: steps.check_failure.outputs.failed == 'true'
-        run: |
-          if [ -n "${{ vars.KESTRA_URL }}" ]; then
-            echo "🤖 Self-Healing CI triggered!"
-            echo "✅ AI-powered PR will be created shortly."
-            echo "📍 PRs: https://github.com/${{ github.repository }}/pulls"
-          else
-            echo "⚠️ KESTRA_URL not set"
-            echo "💡 Set it in: Settings → Secrets and variables → Actions → Variables"
-          fi
-
-      - name: Fail the job if tests failed
-        if: steps.run_tests.outcome == 'failure'
-        run: exit 1
+    # 2️⃣ TRIGGER KESTRA (ONLY IF FAILED)
+    - name: 🚨 Trigger AI Self-Healing
+      if: steps.run_tests.outputs.status == 'failure'
+      run: |
+        # Clean logs for JSON payload (escape quotes and newlines)
+        LOG_CONTENT=$(cat test_logs.txt | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | head -c 10000)
+        
+        echo "🔥 Triggering Kestra Self-Healing Agent..."
+        
+        # ✅ USES SECRETS - NO HARDCODED TOKENS
+        curl -X POST "${{ secrets.KESTRA_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"repository\": \"${{ github.repository }}\",
+            \"branch\": \"${{ github.ref_name }}\",
+            \"job_name\": \"${{ github.job }}\",
+            \"error_message\": \"CI Pipeline Failed on GitHub Actions\",
+            \"error_logs\": \"$LOG_CONTENT\",
+            \"commit_sha\": \"${{ github.sha }}\",
+            \"github_token\": \"${{ secrets.SELF_HEALING_GITHUB_TOKEN }}\",
+            \"gemini_api_key\": \"${{ secrets.GEMINI_API_KEY }}\"
+          }"
+          
+        # Force the job to fail so the red 'X' appears in GitHub
+        exit 1
