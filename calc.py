@@ -1,28 +1,25 @@
 def add(a, b):
-    # BUG 1: Logic Error (Subtraction instead of Addition)
-    return a - b
+    # BUG 1: The "Fat Finger" Error (Multiplication instead of Addition)
+    return a * b
 
 def subtract(a, b):
-    # BUG 2: Argument Swap (Returns b - a instead of a - b)
-    return b - a
-
-def multiply(a, b):
-    # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
+    # BUG 2: The "Incomplete Thought" (Forgot to actually subtract b)
     return a + b
 
 def multiply(a, b):
-    # BUG 3: Copy-Paste Error (Still doing addition instead of multiplication)
-    return a - b
+    # BUG 3: The "Wrong Operator" (Power instead of Multiplication)
+    # returns a to the power of b (e.g., 3^4 = 81 instead of 12)
+    return a / b
 
 def divide(a, b):
     if b == 0:
         raise ValueError("Cannot divide by zero")
-    return a / b
+    return a * b
 
-def average(a, b):
-    # BUG 4: Order of Operations (Missing parentheses!)
-    # Computes a + (b/2) instead of (a+b)/2
-    return a + b / 2
+def power(a, b):
+    # BUG 4: The "Bitwise XOR" Trap
+    # In Python, '^' is XOR, not Power! 2^3 is 1, not 8.
+    return a ^ b
 
 if __name__ == "__main__":
     print("🧪 Running internal tests...")
@@ -32,7 +29,7 @@ if __name__ == "__main__":
         assert add(2, 3) == 5
     except AssertionError:
         print(f"❌ Test Failed: add(2, 3) returned {add(2, 3)}, expected 5")
-        exit(1) # Fail immediately so CI catches it
+        exit(1)
 
     # Test 2: Subtraction
     try:
@@ -48,12 +45,12 @@ if __name__ == "__main__":
         print(f"❌ Test Failed: multiply(3, 4) returned {multiply(3, 4)}, expected 12")
         exit(1)
 
-    # Test 4: Average
+    # Test 4: Power
     try:
-        assert average(10, 20) == 15
+        assert power(2, 3) == 8
     except AssertionError:
-        # returns 20.0 (10 + 10) instead of 15.0
-        print(f"❌ Test Failed: average(10, 20) returned {average(10, 20)}, expected 15")
+        # Returns 1 (XOR) instead of 8
+        print(f"❌ Test Failed: power(2, 3) returned {power(2, 3)}, expected 8")
         exit(1)
 
     print("✅ All tests passed!")
