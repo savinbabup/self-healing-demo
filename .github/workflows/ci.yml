@@ -23,26 +23,23 @@ jobs:
         pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    # 1️⃣ RUN TESTS AND CAPTURE LOGS
+   # 1️⃣ RUN TESTS AND CAPTURE LOGS
     - name: Run Tests & Capture Output
       id: run_tests
       run: |
-        # Run pytest on the 'tests/' folder and save output to file
-        # We ignore failure with '|| true' so we can capture the logs first
+        # Run pytest on the 'tests/' folder
         pytest tests/ > test_logs.txt 2>&1 || true
         
-        # Display logs in console so you can see them in GitHub UI
         cat test_logs.txt
         
-        # Check for failure string
-        if grep -q "FAILED" test_logs.txt; then
-          echo "❌ Tests failed! Preparing self-healing trigger..."
+        # 🔍 UPDATED CHECK: Look for "FAILED" OR "ERROR" (case insensitive)
+        if grep -iE "failed|error" test_logs.txt; then
+          echo "❌ Tests failed or errored! Triggering self-healing..."
           echo "status=failure" >> $GITHUB_OUTPUT
         else
           echo "✅ Tests passed!"
           echo "status=success" >> $GITHUB_OUTPUT
         fi
-
     # 2️⃣ TRIGGER KESTRA (SAFER VERSION USING JQ)
     - name: 🚨 Trigger AI Self-Healing
       if: steps.run_tests.outputs.status == 'failure'
