@@ -27,8 +27,9 @@ jobs:
     - name: Run Tests & Capture Output
       id: run_tests
       run: |
-        # Run pytest and save output to file (ignore failure for now with || true)
-        pytest > test_logs.txt 2>&1 || true
+        # Run pytest on the 'tests/' folder and save output to file
+        # We ignore failure with '|| true' so we can capture the logs first
+        pytest tests/ > test_logs.txt 2>&1 || true
         
         # Display logs in console so you can see them in GitHub UI
         cat test_logs.txt
