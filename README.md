@@ -4,7 +4,7 @@
 
 A fully autonomous DevOps agent that detects CI/CD failures, performs Root Cause Analysis (RCA) using **Google Gemini 2.0 Flash**, and automatically generates code fixes validated by **CodeRabbit**.
 
-## 🏗 Architecture
+## 🏗 Architecture 
 
 1.  **Failure Detection:** GitHub Actions triggers a webhook upon pipeline failure.
 2.  **Orchestration:** **Kestra** receives the signal and starts the recovery flow.
